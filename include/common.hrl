@@ -1,0 +1,2 @@
+-define(APPLICATION, simple_server).
+-define(DEFAULT_PLAYERS_NUM, 2).

@@ -1,0 +1,13 @@
+{ application, simple_server, [
+    {description, "Simple UDP game server"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib,
+        lager,
+        inets
+    ]},
+    {mod, {server_app, []}},
+    {env, []}
+]}.
