@@ -1,18 +1,8 @@
 
-_build/default/lib/.rebar3/rebar_compiler_erl/
-
-_build/default/lib/goldrush/ebin/
-
-_build/default/lib/goldrush/
-
-_build/default/lib/
-
-_build/default/rel/local_release/bin/
-
-_build/default/rel/local_release/
+_build/*
 
 *.dump
 
 rebar.lock
 
-rebar3.crashdump
+*.crashdump

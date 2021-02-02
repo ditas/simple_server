@@ -1,5 +1,5 @@
 #!/bin/bash
 
-./rebar3 release
+rebar3 release
 
-./_build/default/rel/local_release/bin/local_release console
+./_build/default/rel/simple_server/bin/simple_server console
