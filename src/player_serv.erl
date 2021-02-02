@@ -77,7 +77,7 @@ handle_cast(_Request, State) ->
     {stop, Reason :: term(), NewState :: #state{}}).
 handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state.socket =:= Socket ->
 
-    io:format("------PS------Incoming Data ~p~n", [Data]),
+    % io:format("------PS------Incoming Data ~p~n", [Data]),
 
     State1 = case binary:split(Data, <<" ">>, [global]) of
         [<<"move">>, TimeStamp, PlayerX, PlayerY] ->

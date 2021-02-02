@@ -46,7 +46,7 @@ init([]) ->
     _ = process_flag(trap_exit, true),
 
     {ok, Port} = application:get_env(?APPLICATION, incom_port),
-    {ok, Socket} = gen_udp:open(Port, [binary, {active, true}]),
+    {ok, Socket} = gen_udp:open(Port, [binary, {active, once}]),
     {ok, #state{port = Port, socket = Socket}}.
 
 -spec(handle_call(Request :: term(), From :: {pid(), Tag :: term()},
@@ -83,21 +83,27 @@ handle_info({udp, Socket, RemoteIp, RemotePort, Data}, State) when State#state.s
 
     io:format("------NC------Incoming Data ~p~n", [Data]),
 
-    % Test = gen_udp:send(Socket, RemoteIp, RemotePort, "test"),
-    % io:format("------NC------Test ~p~n", [Test]),
-
     State1 = case binary:split(Data, <<" ">>, [global]) of
         [<<"init">>, TimeStamp, MatchId, PlayerId] ->
             handle_match_q(MatchId, PlayerId, TimeStamp, RemoteIp, RemotePort, State);
         _ -> State
     end,
-   
+
+    self() ! reactivate,
+
     {noreply, State1};
 handle_info({'EXIT', Reason}, State) ->
 
     io:format("------NC------Match crashed with message ~p~n", [Reason]),
 
     {noreply, State};
+handle_info(reactivate, #state{port = Port, socket = Socket0} = State) ->
+
+    io:format("------NC------Reactivating socket~n"),
+
+    ok = gen_udp:close(Socket0),
+    {ok, Socket} = gen_udp:open(Port, [binary, {active, once}]),
+    {noreply, State#state{port = Port, socket = Socket}};
 handle_info(Info, State) ->
 
     io:format("------NC------Unknown message ~p~n", [Info]),
@@ -120,11 +126,12 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 handle_match_q(MatchId, PlayerId, TimeStamp, RemoteIp, RemotePort, #state{matches = Matches} = State) ->
     case lists:keyfind(MatchId, 1, Matches) of
-        {MatchId, Pid, Status} when Status =:= standby -> 
+        {MatchId, Pid, Status} when Status =:= standby ->
 
             io:format("------NC-------MATCH is waiting~n"),
 
             _ = gen_server:cast(Pid, {add_player, PlayerId, {RemoteIp, RemotePort}}),
+
             State;
         {MatchId, _Pid, _Status} ->
 
