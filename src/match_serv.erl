@@ -61,16 +61,16 @@ handle_call(_Request, _From, State) ->
 handle_cast({add_player, PlayerId, ConnectionData}, #state{match_id = MatchId, req_players_num = ReqPlayersNum, players = Players} = State) ->
     _ = timer:send_after(?PLAYER_START_TIMEOUT_MS, {start_player, PlayerId, ConnectionData}),
     State1 = case length(Players) + 1 == ReqPlayersNum of
-        true -> 
+        true ->
             network_controller:update_match(MatchId, started),
             State#state{start_time = erlang:system_time(seconds)};
         false ->
             State
     end,
     {noreply, State1#state{players = [{PlayerId, undefined}|Players]}};
-handle_cast({coord_update, PlayerId, TimeStamp, PlayerX, PlayerY}, #state{players = Players} = State) ->
+handle_cast({update, PlayerId, TimeStamp, PlayerState}, #state{players = Players} = State) ->
     case lists:keytake(PlayerId, 1, Players) of
-        {_, _, Players1} -> send_update(Players1, PlayerId, TimeStamp, PlayerX, PlayerY);
+        {_, _, Players1} -> send_update(Players1, PlayerId, TimeStamp, PlayerState);
         _ -> ignore
     end,
     {noreply, State};
@@ -83,7 +83,7 @@ handle_cast(_Request, State) ->
     {stop, Reason :: term(), NewState :: #state{}}).
 handle_info({start_player, PlayerId, ConnectionData}, #state{players = Players} = State) ->
     {ok, Pid} = player_serv:start_link(PlayerId, ConnectionData),
-    
+
     io:format("------MS------ PLAYER is starting ~p~n", [PlayerId]),
 
     Players1 = lists:keydelete(PlayerId, 1, Players),
@@ -109,7 +109,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-send_update(Players, PlayerId, TimeStamp, PlayerX, PlayerY) ->
-    lists:foreach(fun({_, Pid}) -> 
-        gen_server:cast(Pid, {coord_update, PlayerId, TimeStamp, PlayerX, PlayerY})
+send_update(Players, PlayerId, TimeStamp, PlayerState) ->
+    lists:foreach(fun({_, Pid}) ->
+        gen_server:cast(Pid, {update, PlayerId, TimeStamp, PlayerState})
     end, Players).

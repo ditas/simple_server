@@ -65,8 +65,56 @@ handle_cast({response, RemoteIp, RemotePort}, State) ->
     io:format("------PS------response Res ~p~n", [Res]),
 
     {noreply, State#state{socket = S, remote_ip = RemoteIp, remote_port = RemotePort}};
-handle_cast({coord_update, PlayerId, _TimeStamp, PlayerX, PlayerY}, #state{remote_ip = RemoteIp, remote_port = RemotePort, socket = S} = State) ->
-    gen_udp:send(S, {RemoteIp, RemotePort}, "coord_update " ++ binary_to_list(PlayerId) ++ " " ++ binary_to_list(PlayerX) ++ " " ++ binary_to_list(PlayerY)),
+handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
+        PlayerY,
+        PlayerWidth,
+        PlayerHeight,
+        PlayerBaseSpeed,
+        PlayerMaxSpeed,
+        PlayerAction,
+        PlayerAngle,
+        PlayerTime,
+        PlayerFixX,
+        PlayerFixY,
+        PlayerThrowAngleTimeMultiplier,
+        PlayerStatusL,
+        PlayerStatusT,
+        PlayerStatusR,
+        PlayerStatusB}}, #state{remote_ip = RemoteIp, remote_port = RemotePort, socket = S} = State) ->
+    gen_udp:send(S, {RemoteIp, RemotePort}, "update "
+        ++ binary_to_list(PlayerId)
+        ++ " "
+        ++ binary_to_list(PlayerX)
+        ++ " "
+        ++ binary_to_list(PlayerY)
+        ++ " "
+        ++ binary_to_list(PlayerWidth)
+        ++ " "
+        ++ binary_to_list(PlayerHeight)
+        ++ " "
+        ++ binary_to_list(PlayerBaseSpeed)
+        ++ " "
+        ++ binary_to_list(PlayerMaxSpeed)
+        ++ " "
+        ++ binary_to_list(PlayerAction)
+        ++ " "
+        ++ binary_to_list(PlayerAngle)
+        ++ " "
+        ++ binary_to_list(PlayerTime)
+        ++ " "
+        ++ binary_to_list(PlayerFixX)
+        ++ " "
+        ++ binary_to_list(PlayerFixY)
+        ++ " "
+        ++ binary_to_list(PlayerThrowAngleTimeMultiplier)
+        ++ " "
+        ++ binary_to_list(PlayerStatusL)
+        ++ " "
+        ++ binary_to_list(PlayerStatusT)
+        ++ " "
+        ++ binary_to_list(PlayerStatusR)
+        ++ " "
+        ++ binary_to_list(PlayerStatusB)),
     {noreply, State};
 handle_cast(_Request, State) ->
     {noreply, State}.
@@ -77,14 +125,45 @@ handle_cast(_Request, State) ->
     {stop, Reason :: term(), NewState :: #state{}}).
 handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state.socket =:= Socket ->
 
-    % io:format("------PS------Incoming Data ~p~n", [Data]),
+    io:format("------PS------Incoming Data ~p~n", [Data]),
 
     State1 = case binary:split(Data, <<" ">>, [global]) of
-        [<<"move">>, TimeStamp, PlayerX, PlayerY] ->
-            handle_move(TimeStamp, PlayerX, PlayerY, State);
+        [<<"move">>, TimeStamp,
+                PlayerX,
+                PlayerY,
+                PlayerWidth,
+                PlayerHeight,
+                PlayerBaseSpeed,
+                PlayerMaxSpeed,
+                PlayerAction,
+                PlayerAngle,
+                PlayerTime,
+                PlayerFixX,
+                PlayerFixY,
+                PlayerThrowAngleTimeMultiplier,
+                PlayerStatusL,
+                PlayerStatusT,
+                PlayerStatusR,
+                PlayerStatusB
+            ] ->
+            handle_move(TimeStamp, {PlayerX,
+                PlayerY,
+                PlayerWidth,
+                PlayerHeight,
+                PlayerBaseSpeed,
+                PlayerMaxSpeed,
+                PlayerAction,
+                PlayerAngle,
+                PlayerTime,
+                PlayerFixX,
+                PlayerFixY,
+                PlayerThrowAngleTimeMultiplier,
+                PlayerStatusL,
+                PlayerStatusT,
+                PlayerStatusR,
+                PlayerStatusB}, State);
         _ -> State
     end,
-
     {noreply, State};
 handle_info(Info, State) ->
 
@@ -106,6 +185,6 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-handle_move(TimeStamp, PlayerX, PlayerY, #state{player_id = PlayerId, parent_pid = ParentPid} = State) ->
-    gen_server:cast(ParentPid, {coord_update, PlayerId, TimeStamp, PlayerX, PlayerY}),
+handle_move(TimeStamp, PlayerState, #state{player_id = PlayerId, parent_pid = ParentPid} = State) ->
+    gen_server:cast(ParentPid, {update, PlayerId, TimeStamp, PlayerState}),
     State.
