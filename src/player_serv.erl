@@ -80,7 +80,13 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         PlayerStatusL,
         PlayerStatusT,
         PlayerStatusR,
-        PlayerStatusB}}, #state{remote_ip = RemoteIp, remote_port = RemotePort, socket = S} = State) ->
+        PlayerStatusB,
+        PlayerDirection,
+
+        PlayerPlatformX,
+        PlayerPlatformY,
+        PlayerPlatformW,
+        PlayerPlatformH}}, #state{remote_ip = RemoteIp, remote_port = RemotePort, socket = S} = State) ->
     gen_udp:send(S, {RemoteIp, RemotePort}, "update "
         ++ binary_to_list(PlayerId)
         ++ " "
@@ -114,7 +120,17 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         ++ " "
         ++ binary_to_list(PlayerStatusR)
         ++ " "
-        ++ binary_to_list(PlayerStatusB)),
+        ++ binary_to_list(PlayerStatusB)
+        ++ " "
+        ++ binary_to_list(PlayerDirection)
+        ++ " "
+        ++ binary_to_list(PlayerPlatformX)
+        ++ " "
+        ++ binary_to_list(PlayerPlatformY)
+        ++ " "
+        ++ binary_to_list(PlayerPlatformW)
+        ++ " "
+        ++ binary_to_list(PlayerPlatformH)),
     {noreply, State};
 handle_cast(_Request, State) ->
     {noreply, State}.
@@ -144,7 +160,13 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusL,
                 PlayerStatusT,
                 PlayerStatusR,
-                PlayerStatusB
+                PlayerStatusB,
+                PlayerDirection,
+
+                PlayerPlatformX,
+                PlayerPlatformY,
+                PlayerPlatformW,
+                PlayerPlatformH
             ] ->
             handle_move(TimeStamp, {PlayerX,
                 PlayerY,
@@ -161,7 +183,13 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusL,
                 PlayerStatusT,
                 PlayerStatusR,
-                PlayerStatusB}, State);
+                PlayerStatusB,
+                PlayerDirection,
+
+                PlayerPlatformX,
+                PlayerPlatformY,
+                PlayerPlatformW,
+                PlayerPlatformH}, State);
         _ -> State
     end,
     {noreply, State};
