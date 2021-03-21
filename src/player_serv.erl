@@ -83,6 +83,11 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         PlayerStatusB,
         PlayerDirection,
 
+        PlayerShoot,
+        PlayerProjAngle,
+        PlayerProjStartCoordsX,
+        PlayerProjStartCoordsY,
+
         PlayerPlatformX,
         PlayerPlatformY,
         PlayerPlatformW,
@@ -123,6 +128,16 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         ++ binary_to_list(PlayerStatusB)
         ++ " "
         ++ binary_to_list(PlayerDirection)
+
+        ++ " "
+        ++ binary_to_list(PlayerShoot)
+        ++ " "
+        ++ binary_to_list(PlayerProjAngle)
+        ++ " "
+        ++ binary_to_list(PlayerProjStartCoordsX)
+        ++ " "
+        ++ binary_to_list(PlayerProjStartCoordsY)
+
         ++ " "
         ++ binary_to_list(PlayerPlatformX)
         ++ " "
@@ -163,6 +178,11 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusB,
                 PlayerDirection,
 
+                PlayerShoot,
+                PlayerProjAngle,
+                PlayerProjStartCoordsX,
+                PlayerProjStartCoordsY,
+
                 PlayerPlatformX,
                 PlayerPlatformY,
                 PlayerPlatformW,
@@ -185,6 +205,11 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusR,
                 PlayerStatusB,
                 PlayerDirection,
+
+                PlayerShoot,
+                PlayerProjAngle,
+                PlayerProjStartCoordsX,
+                PlayerProjStartCoordsY,
 
                 PlayerPlatformX,
                 PlayerPlatformY,
