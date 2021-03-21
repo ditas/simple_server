@@ -65,7 +65,8 @@ handle_cast({response, RemoteIp, RemotePort}, State) ->
     io:format("------PS------response Res ~p~n", [Res]),
 
     {noreply, State#state{socket = S, remote_ip = RemoteIp, remote_port = RemotePort}};
-handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
+handle_cast({update, PlayerId, _TimeStamp, {
+        PlayerX,
         PlayerY,
         PlayerWidth,
         PlayerHeight,
@@ -82,6 +83,14 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         PlayerStatusR,
         PlayerStatusB,
         PlayerDirection,
+
+        PlayerHurt,
+        PlayerDead,
+
+        PlayerShoot,
+        PlayerProjAngle,
+        PlayerProjStartCoordsX,
+        PlayerProjStartCoordsY,
 
         PlayerPlatformX,
         PlayerPlatformY,
@@ -123,6 +132,21 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         ++ binary_to_list(PlayerStatusB)
         ++ " "
         ++ binary_to_list(PlayerDirection)
+
+        ++ " "
+        ++ binary_to_list(PlayerHurt)
+        ++ " "
+        ++ binary_to_list(PlayerDead)
+
+        ++ " "
+        ++ binary_to_list(PlayerShoot)
+        ++ " "
+        ++ binary_to_list(PlayerProjAngle)
+        ++ " "
+        ++ binary_to_list(PlayerProjStartCoordsX)
+        ++ " "
+        ++ binary_to_list(PlayerProjStartCoordsY)
+
         ++ " "
         ++ binary_to_list(PlayerPlatformX)
         ++ " "
@@ -145,6 +169,7 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
 
     State1 = case binary:split(Data, <<" ">>, [global]) of
         [<<"move">>, TimeStamp,
+                PlayerId,
                 PlayerX,
                 PlayerY,
                 PlayerWidth,
@@ -163,12 +188,22 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusB,
                 PlayerDirection,
 
+                PlayerHurt,
+                PlayerDead,
+
+                PlayerShoot,
+                PlayerProjAngle,
+                PlayerProjStartCoordsX,
+                PlayerProjStartCoordsY,
+
                 PlayerPlatformX,
                 PlayerPlatformY,
                 PlayerPlatformW,
                 PlayerPlatformH
             ] ->
-            handle_move(TimeStamp, {PlayerX,
+            handle_move(TimeStamp, {
+                PlayerId,
+                PlayerX,
                 PlayerY,
                 PlayerWidth,
                 PlayerHeight,
@@ -185,6 +220,14 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusR,
                 PlayerStatusB,
                 PlayerDirection,
+
+                PlayerHurt,
+                PlayerDead,
+
+                PlayerShoot,
+                PlayerProjAngle,
+                PlayerProjStartCoordsX,
+                PlayerProjStartCoordsY,
 
                 PlayerPlatformX,
                 PlayerPlatformY,
@@ -214,5 +257,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 handle_move(TimeStamp, PlayerState, #state{player_id = PlayerId, parent_pid = ParentPid} = State) ->
+
+    io:format("------PS------Handle move PlayerState ~p~n", [PlayerState]),
+
     gen_server:cast(ParentPid, {update, PlayerId, TimeStamp, PlayerState}),
     State.
