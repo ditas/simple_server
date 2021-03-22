@@ -82,6 +82,7 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         PlayerStatusR,
         PlayerStatusB,
         PlayerDirection,
+        PlayerIsJump,
 
         PlayerShoot,
         PlayerProjAngle,
@@ -128,6 +129,8 @@ handle_cast({update, PlayerId, _TimeStamp, {PlayerX,
         ++ binary_to_list(PlayerStatusB)
         ++ " "
         ++ binary_to_list(PlayerDirection)
+        ++ " "
+        ++ binary_to_list(PlayerIsJump)
 
         ++ " "
         ++ binary_to_list(PlayerShoot)
@@ -177,6 +180,7 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusR,
                 PlayerStatusB,
                 PlayerDirection,
+                PlayerIsJump,
 
                 PlayerShoot,
                 PlayerProjAngle,
@@ -205,6 +209,7 @@ handle_info({udp, Socket, _RemoteIp, _RemotePort, Data}, State) when State#state
                 PlayerStatusR,
                 PlayerStatusB,
                 PlayerDirection,
+                PlayerIsJump,
 
                 PlayerShoot,
                 PlayerProjAngle,
